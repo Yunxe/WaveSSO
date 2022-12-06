@@ -1,7 +1,9 @@
 package router
 
 import (
-	"Wave/controller"
+	"Wave/sso"
+	"Wave/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,8 +14,11 @@ func NewRouter() {
 
 	v1 := r.Group("/api")
 	{
-		v1.POST("/register", controller.UserRegister)
-		v1.POST("/login", controller.UserLogin)
+		v1.POST("/register", util.HandlerWarpper(sso.UserRegister))
+		v1.POST("/login", util.HandlerWarpper(sso.UserLogin))
 	}
-	r.Run(":8080")
+	if err := r.Run(":8080"); err != nil {
+		fmt.Println(err)
+		return
+	}
 }

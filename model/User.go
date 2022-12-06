@@ -1,7 +1,7 @@
 package model
 
 import (
-	"errors"
+	"Wave/util"
 	"gorm.io/gorm"
 	"time"
 )
@@ -11,22 +11,26 @@ type User struct {
 	UserName  string         `json:"userName" `
 	Password  string         `json:"password"`
 	Email     string         `json:"email"`
-	Role      int            `json:"role"`
-	Gender    int            `json:"gender"`
-	Status    int            `json:"status"`
+	Role      int8           `json:"role"`
+	Gender    int8           `json:"gender"`
+	Status    int8           `json:"status"`
 	AvatarUrl string         `json:"avatarUrl"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt ` json:"deletedAt" gorm:"index"`
 }
 
-var NilUser = &User{}
+//var NilUser = &User{}
+
+func NewUser() *User {
+	return &User{}
+}
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
-	var user User
+	user := NewUser()
 	tx.Where("email = ?", u.Email).First(&user)
-	if user != *NilUser {
-		return errors.New("邮箱已存在")
+	if *user != *NewUser() {
+		return util.USER_EMAIL_EXIST
 	}
 	return nil
 }
