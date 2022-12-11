@@ -2,14 +2,15 @@ package model
 
 import (
 	"Wave/util"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type User struct {
 	Uid       uint           `json:"uid" gorm:"primaryKey" `
 	UserName  string         `json:"userName" `
-	Password  string         `json:"password"`
+	Password  string         `json:"-"`
 	Email     string         `json:"email"`
 	Role      int8           `json:"role"`
 	Gender    int8           `json:"gender"`

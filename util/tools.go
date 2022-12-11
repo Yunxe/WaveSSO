@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+
 func HandlerWarpper(f func(c *gin.Context) (error, any)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err, data := f(c)
