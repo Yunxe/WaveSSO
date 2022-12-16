@@ -2,8 +2,10 @@ package main
 
 import (
 	"Wave/database"
+	"Wave/migrator"
 	"Wave/router"
 	"context"
+	"flag"
 
 	"github.com/joho/godotenv"
 )
@@ -16,7 +18,11 @@ func main() {
 	database.MysqlConnection(ctx)
 	database.RedisConnection(ctx)
 	// time.Sleep(time.Second * 1)
-	//migrator.Migrate()
+	ifMigrate := flag.Bool("m", false, "recreate table")
+	flag.Parse()
+	if *ifMigrate {
+		migrator.Migrate()
+	}
 	router.NewRouter()
 
 }

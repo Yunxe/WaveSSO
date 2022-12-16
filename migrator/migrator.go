@@ -16,4 +16,5 @@ func Migrate() {
 		fmt.Println("create table error" + err.Error())
 		return
 	}
+	fmt.Println("migrator running")
 }

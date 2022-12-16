@@ -1,49 +1,61 @@
 package sso
 
 import (
+	"Wave/database"
 	"Wave/util"
 	"errors"
+	"github.com/go-redis/redis/v9"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-func UserAuth(c *gin.Context) (err error, data any) {
+func UserAuth(c *gin.Context) {
 	var (
 		h   util.Header
 		arr []string
 	)
 	if err := c.ShouldBindHeader(&h); err != nil {
-		c.Abort()
-		return util.AUTH_REQUIRE, nil
+		c.AbortWithStatusJSON(
+			util.ErrWrapper(util.AUTH_REQUIRE),
+		)
 	}
 
 	if arr = strings.Fields(h.Authorization); strings.ToLower(arr[0]) != "bearer" {
-		c.Abort()
-		return util.AUTH_TYPE_ERR, nil
+		c.AbortWithStatusJSON(
+			util.ErrWrapper(util.AUTH_TYPE_ERR),
+		)
 	}
 
 	token, err := util.ParseToken(arr[1])
 	if err != nil {
-		c.Abort()
 		switch {
 		case errors.Is(err, util.AUTH_TOKEN_EXPIRED):
-			return util.AUTH_TOKEN_EXPIRED, nil
+			c.AbortWithStatusJSON(
+				util.ErrWrapper(util.AUTH_TOKEN_EXPIRED),
+			)
 		case errors.Is(err, util.AUTH_TOKEN_INVALID_ISSUER):
-			return util.AUTH_TOKEN_INVALID_ISSUER, nil
+			c.AbortWithStatusJSON(
+				util.ErrWrapper(util.AUTH_TOKEN_INVALID_ISSUER),
+			)
 		default:
-			return util.AUTH_PARSE_TOKEN_ERR, nil
+			c.AbortWithStatusJSON(
+				util.ErrWrapper(util.AUTH_PARSE_TOKEN_ERR),
+			)
 		}
 	}
 	if claims, ok := token.Claims.(*util.UserClaims); ok && token.Valid {
+		err := database.RDB.Get(c, token.Raw).Err()
+		if err != redis.Nil {
+			c.AbortWithStatusJSON(
+				util.ErrWrapper(util.AUTH_TOKEN_INVALID_IN_BLACK_LIST),
+			)
+		}
+
 		c.Set("uid", claims.Uid)
+		c.Set("token", token.Raw)
+
 		c.Next()
-	}
-	u, _ := c.Get("user")
-	return nil, &util.StatusWithData{
-		Code:    0,
-		Message: "成功",
-		Data:    u,
 	}
 
 }

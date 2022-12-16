@@ -17,9 +17,10 @@ func NewRouter() {
 
 	v1 := r.Group("/api")
 	{
-		v1.POST("/register", util.HandlerWarpper(sso.UserRegister))
-		v1.POST("/login", util.HandlerWarpper(sso.UserLogin))
-		v1.POST("/info", util.HandlerWarpper(sso.UserAuth), sso.UserInfo)
+		v1.POST("/register", util.HandlerWrapper(sso.UserRegister))
+		v1.POST("/login", util.HandlerWrapper(sso.UserLogin))
+		v1.POST("/info", sso.UserAuth, util.HandlerWrapper(sso.UserInfo))
+		v1.POST("/logout", sso.UserAuth, util.HandlerWrapper(sso.UserLogout))
 	}
 	if err := r.Run(":8079"); err != nil {
 		fmt.Println(err)

@@ -1,11 +1,10 @@
 package sso
 
 import (
+	"Wave/config"
 	"Wave/database"
 	"Wave/model"
 	"Wave/util"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -51,7 +50,7 @@ func UserLogin(c *gin.Context) (err error, data any) {
 		Data: &util.TokenInfo{
 			Token:     token,
 			TokenType: "bearer",
-			ExpiresIn: time.Time{}.Second() * 10,
+			ExpiresIn: config.ExpireTime,
 		},
 	}
 }

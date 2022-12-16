@@ -1,6 +1,7 @@
 package util
 
 import (
+	"Wave/config"
 	"os"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 type TokenInfo struct {
 	Token     string
 	TokenType string
-	ExpiresIn int
+	ExpiresIn time.Duration
 }
 
 type UserClaims struct {
@@ -30,7 +31,7 @@ func (c *UserClaims) CreateToken() (string, error) {
 	c.RegisteredClaims = jwt.RegisteredClaims{
 		Issuer:    "WaveSSO",
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(1000 * time.Second)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.ExpireTime)),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 	signedToken, err := token.SignedString([]byte(SignKey))
